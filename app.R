@@ -7,119 +7,117 @@
 if (!requireNamespace("shiny", quietly = TRUE)) {
   install.packages("shiny")
 }
-library(shiny)
+library(shiny, warn.conflicts = F)
 
 if (!requireNamespace("readxl", quietly = TRUE)) {
   install.packages("readxl")
 }
-library(readxl)
+library(readxl, warn.conflicts = F)
 
 if (!requireNamespace("bslib", quietly = TRUE)) {
   install.packages("bslib")
 }
-library(bslib)
+library(bslib, warn.conflicts = F)
 
 if (!requireNamespace("shinythemes", quietly = TRUE)) {
   install.packages("shinythemes")
 }
-library(shinythemes)
+library(shinythemes, warn.conflicts = F)
 
 if (!requireNamespace("shinyWidgets", quietly = TRUE)) {
   install.packages("shinyWidgets")
 }
-library(shinyWidgets)
+library(shinyWidgets, warn.conflicts = F)
 
 if (!requireNamespace("decisionSupport", quietly = TRUE)) {
   install.packages("decisionSupport")
 }
-library(decisionSupport)
+library(decisionSupport, warn.conflicts = F)
 
 if (!requireNamespace("tidyverse", quietly = TRUE)) {
   install.packages("tidyverse")
 }
-library(tidyverse)
+library(tidyverse, warn.conflicts = F)
 
 if (!requireNamespace("readr", quietly = TRUE)) {
   install.packages("readr")
 }
-library(readr)  # For reading and writing CSV files
+library(readr, warn.conflicts = F)  # For reading and writing CSV files
 
 if (!requireNamespace("ggridges", quietly = TRUE)) {
   install.packages("ggridges")
 }
-library(ggridges)
+library(ggridges, warn.conflicts = F)
 
 if (!requireNamespace("ggplot2", quietly = TRUE)) {
   install.packages("ggplot2")
 }
-library(ggplot2)
+library(ggplot2, warn.conflicts = F)
 
 if (!requireNamespace("dplyr", quietly = TRUE)) {
   install.packages("dplyr")
 }
-library(dplyr)
+library(dplyr, warn.conflicts = F)
+
 if (!requireNamespace("here", quietly = TRUE)) {
   install.packages("here")
 }
-library(here)
+library(here, warn.conflicts = F)
+
 if (!requireNamespace("ggtext", quietly = TRUE)) {
   install.packages("ggtext")
 }
-library(ggtext)
+library(ggtext, warn.conflicts = F)
+
 if (!requireNamespace("ggh4x", quietly = TRUE)) {
   install.packages("ggh4x")
 }
-library(ggh4x)
+library(ggh4x, warn.conflicts = F)
 # Provide specific packages you have used other than the ones mentioned above
 if (!requireNamespace("ggtext", quietly = TRUE)) {
   install.packages("ggtext")
 }
-library(ggtext)
+library(ggtext, warn.conflicts = F)
 
 if (!requireNamespace("png", quietly = TRUE)) {
   install.packages("png")
 }
-library(png)
+library(png, warn.conflicts = F)
 
 if (!requireNamespace("grid", quietly = TRUE)) {
   install.packages("grid")
 }
-library(grid)
+library(grid, warn.conflicts = F)
 
 if (!requireNamespace("patchwork", quietly = TRUE)) {
   install.packages("patchwork")
 }
-library(patchwork)
-
-if (!requireNamespace("patchwork", quietly = TRUE)) {
-  install.packages("patchwork")
-}
-library(patchwork)
+library(patchwork, warn.conflicts = F)
 
 if (!requireNamespace("lubridate", quietly = TRUE)) {
   install.packages("lubridate")
 }
-library(lubridate)
+library(lubridate, warn.conflicts = F)
 
 if (!requireNamespace("zoo", quietly = TRUE)) {
   install.packages("zoo")
 }
-library(zoo)
+library(zoo, warn.conflicts = F)
 
 if (!requireNamespace("RcppRoll", quietly = TRUE)) {
   install.packages("RcppRoll")
 }
-library(RcppRoll)
+library(RcppRoll, warn.conflicts = F)
 
 if (!requireNamespace("compiler", quietly = TRUE)) {
   install.packages("compiler")
 }
-library(compiler)
+library(compiler, warn.conflicts = F)
 
 if (!requireNamespace("data.table", quietly = TRUE)) {
   install.packages("data.table")
 }
-library(data.table)
+library(data.table, warn.conflicts = F)
 
 # Load functins and inputs ----
 # Provide Location of DA model script(s), dynamic-helper
@@ -306,19 +304,6 @@ ui <- fluidPage(
                 )
               ),
               br(), br(),
-              
-              #Debug:
-              #titlePanel("Selected Financial Supports"),
-              #create_funding_ui("funding"),        # UI part from the module
-              #uiOutput("financial_support_links"),
-              
-              
-              # tags$h4("Selected Financial Supports"),
-              # tableOutput("summary"),
-              
-              #Debug:
-              #verbatimTextOutput("summary"), 
-              # uiOutput("funding-financial-support"),
               
               ### Plots ----
               imageOutput("myImage"),
@@ -568,50 +553,12 @@ server <- function(input, output, session) {
       ) %>%
       select(-ends_with(".new"))
     
-    # 3. Append funding scalars
-    # View(input_file)
-    #print(1)
-    
-    funding_names <- 
-      c("funding_onetime_percentage_initial_cost_schemes_c", "annual_funding_schemes_c",
-        "funding_onetime_percentage_consult_schemes_c","funding_onetime_per_tree_schemes_c",
-        "funding_onetime_per_m_treerow_schemes_c", "funding_onetime_per_m_hedgerow_schemes_c","annual_funding_per_m_schemes_c",
-        "annual_funding_per_tree_schemes_c", "funding_onetime_schemes_c",
-        "onetime_external_percentage_incost_schemes_c","onetime_external_percentage_consult_schemes_c",
-        "funding_onetime_per_ha_schemes_c", "onetime_external_support_c", "annual_external_support_c")
-    funding_df <- data.frame(variable = funding_names,
-                             lower = 0,
-                             upper = 0,
-                             distribution = "const")
-    
-    try(total_funding <- funding$total_funding_with_private())
-    
-    if ("total_funding" %in% ls()) {
-      #print(2)
-      
-      input_file <- 
-        data.frame(variable = names(total_funding),
-                   lower = unname(total_funding),
-                   upper = unname(total_funding),
-                   distribution = "const") %>% 
-        bind_rows(input_file, .)
-      
-      remain <- funding_names[!(funding_names %in% input_file$variable)]
-      input_file <- funding_df %>% 
-        filter(variable %in% remain) %>% 
-        bind_rows(input_file, .)
-      
-      # View(input_file)
-    }else {
-      input_file <- bind_rows(input_file, funding_df)
-    }
-    
     #View(input_file)
     
-    # # 4. Save UI snapshot (optional)
+    # # 3. Save UI snapshot (optional)
     # saveRDS(list(sheet_names, input_file), "data/Walnut_grain_veg_tub_ui_updated.RDS")
     
-    # 5. clean-up: keep only numeric rows
+    # 4. clean-up: keep only numeric rows
     input_file <- input_file %>%
       filter(
         !is.na(lower), !is.na(upper),
@@ -698,30 +645,6 @@ server <- function(input, output, session) {
     
     # ordinary widgets
     lapply(names(vals), \(id) try(restore_one(id, vals[[id]]), silent = TRUE))
-    
-    # funding module widgets  (country + state first, the rest after rebuild)
-    ## doesn't work cleanly yet - load button needs to be pressed twice
-    ns <- NS("funding")   # helper to prepend "funding-"
-    
-    # (a) push country and state immediately 
-    try(updateSelectInput(session, ns("country"),
-                          selected = vals[[ns("country")]]), silent = TRUE)
-    try(updateSelectInput(session, ns("state"),
-                          selected = vals[[ns("state")]]),   silent = TRUE)
-    
-    # (b) *once* the state really is set, restore the rest
-    observeEvent(input[[ns("state")]], {
-      if (!identical(input[[ns("state")]], vals[[ns("state")]])) return()
-      
-      try(updateSelectInput(session, ns("one_schemes"),
-                            selected = vals[[ns("one_schemes")]]), silent = TRUE)
-      try(updateSelectInput(session, ns("annual_schemes"),
-                            selected = vals[[ns("annual_schemes")]]), silent = TRUE)
-      try(updateNumericInput(session, ns("onetime_private"),
-                             value = vals[[ns("onetime_private")]]),  silent = TRUE)
-      try(updateNumericInput(session, ns("annual_private"),
-                             value = vals[[ns("annual_private")]]),   silent = TRUE)
-    }, once = TRUE, ignoreInit = FALSE)
   })
   
   observeEvent(input$delete_btn, {
@@ -988,9 +911,9 @@ server <- function(input, output, session) {
       crop_lower <- tolower(crop)
       
       path <- if (crop_lower == "spargel") {
-        file.path("www", "INRES_UniBonn.png")
+        file.path("www", "Spargel_CM.png")
       } else if (crop_lower == "zwiebel") {
-        file.path("www", "mlv-logo.png")
+        file.path("www", "Zwiebel_CM.jpeg")
       } else {
         NULL
       }
@@ -1008,8 +931,8 @@ server <- function(input, output, session) {
       list(
         src         = normalizePath(info$path),
         contentType = "image/png",
-        width       = 400,
-        height      = 300,
+        width       = "auto",
+        height      = 550,
         alt         = paste("Image for", info$crop)
       )
     }, deleteFile = FALSE)
@@ -1032,12 +955,7 @@ server <- function(input, output, session) {
         file.copy(from = info$path, to = file, overwrite = TRUE)
       }
     )
-    
-    
-    
-    
-    
-    
+
     output$plot1_ui <- renderPlot({ plot1 })
     make_download("download_plot1", plot1, "Figure1_marketable_yield.png")
     output$plot1_dl_ui <- renderUI({
@@ -1050,17 +968,17 @@ server <- function(input, output, session) {
       downloadButton("download_plot2", "Abbildung herunterladen")
     })
     
-    output$plot3_ui <- renderPlot({ plot3 })
-    make_download("download_plot3", plot3, "Figure3_Funding_NPVs.png")
-    output$plot3_dl_ui <- renderUI({
-      downloadButton("download_plot3", "Abbildung herunterladen")
-    })
-    
-    output$plot4_ui <- renderPlot({ plot4 })
-    make_download("download_plot4", plot4, "Figure4_Annual_Cashflow.png")
-    output$plot4_dl_ui <- renderUI({
-      downloadButton("download_plot4", "Abbildung herunterladen")
-    })
+    # output$plot3_ui <- renderPlot({ plot3 })
+    # make_download("download_plot3", plot3, "Figure3_Funding_NPVs.png")
+    # output$plot3_dl_ui <- renderUI({
+    #   downloadButton("download_plot3", "Abbildung herunterladen")
+    # })
+    # 
+    # output$plot4_ui <- renderPlot({ plot4 })
+    # make_download("download_plot4", plot4, "Figure4_Annual_Cashflow.png")
+    # output$plot4_dl_ui <- renderUI({
+    #   downloadButton("download_plot4", "Abbildung herunterladen")
+    # })
     # 
     # output$plot5_ui <- renderPlot({ plot5 })
     # make_download("download_plot5", plot5, "Figure5_Cumulative_Cashflow.png")
