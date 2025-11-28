@@ -322,7 +322,8 @@ ui <- fluidPage(
               
               ### Plots ----
               imageOutput("myImage"),
-              downloadButton("downloadImage", "Konzeptmodell herunterladen"),
+              uiOutput("download_ui"),
+              #downloadButton("downloadImage", "Konzeptmodell herunterladen"),
               
               br(), br(),
               div(class = "scroll-xy",
@@ -401,34 +402,6 @@ ui <- fluidPage(
 
 # Server ----
 server <- function(input, output, session) {
-  
-  # ## Dynamic funding module ----
-  # funding <- funding_server("funding")   # returns a list of reactives
-  # 
-  # output$`funding-financial-support` <- renderUI({
-  #   funding$financial_support_links
-  # })
-  # # output$summary <- renderPrint({
-  # #   result$category_totals()          
-  # output$summary <- renderTable({
-  #   
-  #   # Get the full funding totals (gov + private) as a named list
-  #   total_funding <- funding$total_funding_with_private()
-  #   
-  #   # Debug: data frame for table output ### remove for the final or can be displayed in the mainPanel too - upto @Adrain
-  #   data.frame(
-  #     `Funding Category` = str_to_title(str_replace_all(str_remove(names(total_funding), "_c$"), "_", " ")),
-  #     `Total Financial Support` = round(unname(total_funding), 2),
-  #     check.names = FALSE,
-  #     row.names = NULL
-  #   )
-  # })
-  # ## Helper for safe extraction from named vector
-  # safe_get <- function(vec, name) {
-  #   if (is.null(vec) || length(vec) == 0 || is.na(vec[name])) return(0)
-  #   if (! name %in% names(vec)) return(0)
-  #   as.numeric(vec[name])
-  # }
   
   ## Dynamic UI inputs ----
   
@@ -523,11 +496,8 @@ server <- function(input, output, session) {
     crop_clause <- sprintf("(%s) || (%s)", crop_show_all, paste(crop_ids, collapse = " || "))
     
     # Beide Gruppen müssen passen
-    sprintf("(%s) && (%s)", exp_clause, crop_clause)
+    sprintf("(%s) && (%s)", crop_clause, exp_clause)
   }
-  
-  
-  
   
   output$dynamic_element_ui <- renderUI({
     
@@ -569,20 +539,7 @@ server <- function(input, output, session) {
   
   current_input_table <- reactive({
     variables <- all_inputs()
-    # # source("functions/Walnut_grain_veg_tub_mcsim-only.R", local = T)
-    # 
-    # message("Accessing user input estimates from the interface...")
-    # 
-    # # 1. Gather current widget values
-    # exclude_inputs <- c("collapseSidebar", "save", "load", "delete",
-    #                     "confirm_delete", "admin_selected_user",
-    #                     "project_name", "version_select", "delete_version_select")
-    # 
-    # # variables <- setdiff(
-    #   names(input)[grepl("(_c$|_p$|_t$|_n$|_cond$)", names(input))],
-    #   exclude_inputs
-    # )
-    
+
     lower_values <- sapply(variables, function(v) {
       val <- input[[v]]
       if (length(val) == 1) as.numeric(val) else as.numeric(val[1])
@@ -1023,42 +980,56 @@ server <- function(input, output, session) {
     
     # Send plots to UI
     
-    
-    img_path <- reactive({
+    # display of conceptual model image from www folder
+    img_info <- eventReactive(selected_crop(), {
       crop <- selected_crop()
-      req(crop)   # instead of manual NULL check
+      validate(need(!is.null(crop), "Bitte zuerst eine Nutzpflanze auswählen."))
       
-      if (crop == "Spargel") {
+      crop_lower <- tolower(crop)
+      
+      path <- if (crop_lower == "spargel") {
         file.path("www", "INRES_UniBonn.png")
-      } else if (crop == "Zwiebel") {
+      } else if (crop_lower == "zwiebel") {
         file.path("www", "mlv-logo.png")
       } else {
         NULL
       }
+      
+      list(
+        crop = crop,
+        path = path
+      )
     })
     
     output$myImage <- renderImage({
-      req(img_path())
-      crop <- selected_crop()
+      info <- img_info()        
+      req(info)
       
       list(
-        src         = normalizePath(img_path()),
+        src         = normalizePath(info$path),
         contentType = "image/png",
         width       = 400,
         height      = 300,
-        alt         = paste("Image for", crop)
+        alt         = paste("Image for", info$crop)
       )
     }, deleteFile = FALSE)
     
+    output$download_ui <- renderUI({
+      req(img_info())
+      downloadButton("downloadImage", "Bild herunterladen")
+    })
+    
+    
     output$downloadImage <- downloadHandler(
       filename = function() {
-        crop <- selected_crop()
-        req(crop)
-        paste0(tolower(crop), ".png")
+        info <- img_info()
+        req(info)
+        paste0(tolower(info$crop), ".png")
       },
       content = function(file) {
-        req(img_path())
-        file.copy(from = img_path(), to = file, overwrite = TRUE)
+        info <- img_info()
+        req(info)
+        file.copy(from = info$path, to = file, overwrite = TRUE)
       }
     )
     
