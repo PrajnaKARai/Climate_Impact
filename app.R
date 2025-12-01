@@ -306,8 +306,13 @@ ui <- fluidPage(
               br(), br(),
               
               ### Plots ----
-              imageOutput("myImage"),
+              #imageOutput("myImage"),
+              div(class = "scroll-xy",
+                  imageOutput("myImage", height = "550px"),
+              ),
+              br(),
               uiOutput("download_ui"),
+              br(), br(),br(), br(),
               #downloadButton("downloadImage", "Konzeptmodell herunterladen"),
               
               br(), br(),
@@ -813,23 +818,6 @@ server <- function(input, output, session) {
     
     else if (crop=="Zwiebel"){
       
-      #restructure output, write additional parameters that are used in the model
-      #form output to input side for analysis
-      # outputs<-c("water_stress_risk",
-      #            "insect_risk",
-      #            "disease_risk",
-      #            "photosynthetic_active_days",
-      #            "weather_damage_risk",
-      #            "growth_start_doy",
-      #            "speargrowth",
-      #            "chill_portions",
-      #            "late_frost_risk",
-      #            "temp_fluctuation_risk",
-      #            "extreme_rainfall_risk",
-      #            "extreme_heat_risk",
-      #            "Tsoil_mean")
-      # 
-      # mc_data_order<-youtputs_to_xinputs_scenarios(mc_data, outputs)
       source("functions/yield_boxplot_onion.R")
       plot1<-plot_yield_onion(mc_data)
       
@@ -841,8 +829,6 @@ server <- function(input, output, session) {
     # 
     # source("functions/VIP_plot.R")
     # plot2<-VIP_plot(mc_data_order)
-    
-    
     #     plot2 <- decisionSupport::plot_distributions(
     #       mc_data, "NPV_decis_AF_ES3",
     #       method     = "smooth_simple_overlay",
@@ -954,7 +940,7 @@ server <- function(input, output, session) {
         src         = normalizePath(info$path),
         contentType = "image/png",
         width       = "auto",
-        height      = 550,
+        height      = 1050,
         alt         = paste("Image for", info$crop)
       )
     }, deleteFile = FALSE)
