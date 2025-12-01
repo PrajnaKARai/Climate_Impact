@@ -855,12 +855,12 @@ server <- function(input, output, session) {
       source("functions/plot_yield_asparagus.R")
       plot1<-plot_yield_asparagus(mc_data_order) |>
         add_meta(
-        title    = "Figure 1. Distribution of the *incremental* NPV",
-        subtitle = "Difference between agroforestry and treeless farming under identical conditions",
-        caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
+          title    = "Figure 1. Distribution of the *incremental* NPV",
+          subtitle = "Difference between agroforestry and treeless farming under identical conditions",
+          caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
                       as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
                       The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
-        , legend = "none")
+          , legend = "none")
       
       source("functions/VIP_plot.R") 
       plot2<-VIP_plot(mc_data_order)|>
@@ -1005,58 +1005,7 @@ server <- function(input, output, session) {
     
     # Send plots to UI
     
-    # display of conceptual model image from www folder
-    img_info <- eventReactive(selected_crop(), {
-      crop <- selected_crop()
-      validate(need(!is.null(crop), "Bitte zuerst eine Nutzpflanze auswählen."))
-      
-      crop_lower <- tolower(crop)
-      
-      path <- if (crop_lower == "spargel") {
-        file.path("www", "Spargel_CM.png")
-      } else if (crop_lower == "zwiebel") {
-        file.path("www", "Zwiebel_CM.jpeg")
-      } else {
-        NULL
-      }
-      
-      list(
-        crop = crop,
-        path = path
-      )
-    })
     
-    output$myImage <- renderImage({
-      info <- img_info()        
-      req(info)
-      
-      list(
-        src         = normalizePath(info$path),
-        contentType = "image/png",
-        width       = "auto",
-        height      = 1050,
-        alt         = paste("Image for", info$crop)
-      )
-    }, deleteFile = FALSE)
-    
-    output$download_ui <- renderUI({
-      req(img_info())
-      downloadButton("downloadImage", "Bild herunterladen")
-    })
-    
-    
-    output$downloadImage <- downloadHandler(
-      filename = function() {
-        info <- img_info()
-        req(info)
-        paste0(tolower(info$crop), ".png")
-      },
-      content = function(file) {
-        info <- img_info()
-        req(info)
-        file.copy(from = info$path, to = file, overwrite = TRUE)
-      }
-    )
     
     output$plot1_ui <- renderPlot({ plot1 })
     make_download("download_plot1", plot1, "Figure1_marketable_yield.png")
@@ -1171,6 +1120,59 @@ server <- function(input, output, session) {
     # })
     
   })
+  
+  # display of conceptual model image from www folder
+  img_info <- eventReactive(selected_crop(), {
+    crop <- selected_crop()
+    validate(need(!is.null(crop), "Bitte zuerst eine Nutzpflanze auswählen."))
+    
+    crop_lower <- tolower(crop)
+    
+    path <- if (crop_lower == "spargel") {
+      file.path("www", "Spargel_CM.png")
+    } else if (crop_lower == "zwiebel") {
+      file.path("www", "Zwiebel_CM.jpeg")
+    } else {
+      NULL
+    }
+    
+    list(
+      crop = crop,
+      path = path
+    )
+  })
+  
+  output$myImage <- renderImage({
+    info <- img_info()        
+    req(info)
+    
+    list(
+      src         = normalizePath(info$path),
+      contentType = "image/png",
+      width       = "auto",
+      height      = 1050,
+      alt         = paste("Image for", info$crop)
+    )
+  }, deleteFile = FALSE)
+  
+  output$download_ui <- renderUI({
+    req(img_info())
+    downloadButton("downloadImage", "Bild herunterladen")
+  })
+  
+  
+  output$downloadImage <- downloadHandler(
+    filename = function() {
+      info <- img_info()
+      req(info)
+      paste0(tolower(info$crop), ".png")
+    },
+    content = function(file) {
+      info <- img_info()
+      req(info)
+      file.copy(from = info$path, to = file, overwrite = TRUE)
+    }
+  )
   
 }
 
