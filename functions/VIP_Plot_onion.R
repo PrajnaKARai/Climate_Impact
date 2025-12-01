@@ -177,6 +177,6 @@ make_onion_vip_combined_plot <- function(sim_list,
 
 ## Display Plot ------------------------------------------------------
 
- combined_plot <- make_onion_vip_combined_plot(onion_mc_simulation)
- combined_plot
+ # combined_plot <- make_onion_vip_combined_plot(onion_mc_simulation)
+ # combined_plot
 

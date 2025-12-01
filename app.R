@@ -452,9 +452,6 @@ server <- function(input, output, session) {
     )
   })
   
-  
-  
-  
   # util: turns a category vector into a JS condition 
   ## render but hide unchecked expertise categories - default show-all
   panel_condition <- function(cat_vec) {
@@ -790,7 +787,6 @@ server <- function(input, output, session) {
     
     
     if (crop=="Spargel"){
-      
       #restructure output, write additional parameters that are used in the model
       #form output to input side for analysis
       outputs<-c("water_stress_risk",
@@ -835,10 +831,10 @@ server <- function(input, output, session) {
       # 
       # mc_data_order<-youtputs_to_xinputs_scenarios(mc_data, outputs)
       source("functions/yield_boxplot_onion.R")
-      plot1<-plot_yield_asparagus(mc_data_order)
+      plot1<-plot_yield_onion(mc_data)
       
       source("functions/VIP_Plot_onion.R")
-      plot2<-VIP_plot(mc_data_order)
+      plot2<-make_onion_vip_combined_plot(mc_data)
     }
     # source("functions/plot_yield_asparagus.R")
     # plot1<-plot_yield_asparagus(mc_data_order)
