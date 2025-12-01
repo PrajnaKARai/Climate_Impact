@@ -1,4 +1,4 @@
-plot_yield_onion <- function(onion_model_shiny)
+plot_yield_onion <- function(mcSimulation_results)
 {
   load_if_needed <- function(pkgs) {
   for (pkg in pkgs) {
@@ -24,33 +24,33 @@ load_if_needed(c(
 
 results_yield_onion <- rbind(
   data.frame(
-    Ertrag = onion_model_shiny$y$historical.raw_yield_per_ha,
-    vermarktbarer_Ertrag = onion_model_shiny$y$historical.final_yield_per_ha,
-    id = seq_along(onion_model_shiny$y$historical.raw_yield_per_ha),
+    Ertrag = mcSimulation_results$y$historical.raw_yield_per_ha,
+    vermarktbarer_Ertrag = mcSimulation_results$y$historical.final_yield_per_ha,
+    id = seq_along(mcSimulation_results$y$historical.raw_yield_per_ha),
     scenario = "Historical Weather"
   ),
   data.frame(
-    Ertrag = onion_model_shiny$y$ssp126.raw_yield_per_ha,
-    vermarktbarer_Ertrag = onion_model_shiny$y$ssp126.final_yield_per_ha,
-    id = seq_along(onion_model_shiny$y$ssp126.raw_yield_per_ha),
+    Ertrag = mcSimulation_results$y$ssp126.raw_yield_per_ha,
+    vermarktbarer_Ertrag = mcSimulation_results$y$ssp126.final_yield_per_ha,
+    id = seq_along(mcSimulation_results$y$ssp126.raw_yield_per_ha),
     scenario = "SSP 1-2.6"
   ),
   data.frame(
-    Ertrag = onion_model_shiny$y$ssp245.raw_yield_per_ha,
-    vermarktbarer_Ertrag = onion_model_shiny$y$ssp245.final_yield_per_ha,
-    id = seq_along(onion_model_shiny$y$ssp245.raw_yield_per_ha),
+    Ertrag = mcSimulation_results$y$ssp245.raw_yield_per_ha,
+    vermarktbarer_Ertrag = mcSimulation_results$y$ssp245.final_yield_per_ha,
+    id = seq_along(mcSimulation_results$y$ssp245.raw_yield_per_ha),
     scenario = "SSP 2-4.5"
   ),
   data.frame(
-    Ertrag = onion_model_shiny$y$ssp370.raw_yield_per_ha,
-    vermarktbarer_Ertrag = onion_model_shiny$y$ssp370.final_yield_per_ha,
-    id = seq_along(onion_model_shiny$y$ssp370.raw_yield_per_ha),
+    Ertrag = mcSimulation_results$y$ssp370.raw_yield_per_ha,
+    vermarktbarer_Ertrag = mcSimulation_results$y$ssp370.final_yield_per_ha,
+    id = seq_along(mcSimulation_results$y$ssp370.raw_yield_per_ha),
     scenario = "SSP 3-7.0"
   ),
   data.frame(
-    Ertrag = onion_model_shiny$y$ssp585.raw_yield_per_ha,
-    vermarktbarer_Ertrag = onion_model_shiny$y$ssp585.final_yield_per_ha,
-    id = seq_along(onion_model_shiny$y$ssp585.raw_yield_per_ha),
+    Ertrag = mcSimulation_results$y$ssp585.raw_yield_per_ha,
+    vermarktbarer_Ertrag = mcSimulation_results$y$ssp585.final_yield_per_ha,
+    id = seq_along(mcSimulation_results$y$ssp585.raw_yield_per_ha),
     scenario = "SSP 5-8.5"
   )
 )

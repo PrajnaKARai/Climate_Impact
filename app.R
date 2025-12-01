@@ -9,6 +9,11 @@ if (!requireNamespace("shiny", quietly = TRUE)) {
 }
 library(shiny, warn.conflicts = F)
 
+if (!requireNamespace("waiter", quietly = TRUE)) {
+  install.packages("waiter")
+}
+library(waiter, warn.conflicts = F)
+
 if (!requireNamespace("readxl", quietly = TRUE)) {
   install.packages("readxl")
 }
@@ -139,7 +144,7 @@ source("functions/onion_model_shiny.R")
 # Dynamic helper to load the UI variables from the excel sheet
 source("functions/dynamic_helper_v3.R")
 # Provide Location of excel workbook containing the input parameters (prepared for the dynamic-helper)
-file_path_vars <- "data/ASP_input_parameters_german.xlsx"
+file_path_vars <- "data/ASP_input_parameters_german1.xlsx"
 sheet_meta <- readxl::read_excel(file_path_vars, sheet = "sheet_names",
                                  col_types = c("text", "text"))
 sheet_names <- sheet_meta$sheet_names
@@ -161,6 +166,8 @@ ui <- fluidPage(
   theme = bs_theme(version = 5,
                    bootswatch = 'flatly',
                    base_font = font_google("Roboto")), 
+  
+  use_waiter(),
   # Set actual browser tab title and favicon
   tags$head(
     tags$title("Agriculture Decision Support Tool"),
@@ -526,7 +533,7 @@ server <- function(input, output, session) {
   
   current_input_table <- reactive({
     variables <- all_inputs()
-
+    
     lower_values <- sapply(variables, function(v) {
       val <- input[[v]]
       if (length(val) == 1) as.numeric(val) else as.numeric(val[1])
@@ -691,30 +698,66 @@ server <- function(input, output, session) {
     else if (crop=="Spargel"){
       environment(asparagus_sim_scen)$scenarios <- scenarios
       environment(asparagus_sim_scen)$risk_df <- risk_df
+      # loading animation
+      waiter_show(
+        html = tagList(
+          spin_fading_circles(),
+          "Modell ausführen und Abbildungen erstellen ..."
+        ),
+        color = "rgba(0, 0, 0, 0.8)"
+      )
       
+      # If something throws, hide the waiter so users aren't stuck
+      ok <- FALSE
+      on.exit({
+        if (!ok) waiter_hide()
+      }, add = TRUE)
+      # end of loading animation
       decisionSupport::mcSimulation(
         estimate          = decisionSupport::as.estimate(input_file),
         model_function    = asparagus_sim_scen,
         numberOfModelRuns = input$num_simulations_c,
         functionSyntax    = "plainNames"
       )
+      # #part of loading animation
+      # session$onFlushed(function() waiter_hide(), once = TRUE)
+      # ok <- TRUE
+      
     }
     else if (crop=="Zwiebel"){
       #environment(onion_model_shiny)$onion_weather <- onion_weather
-       environment(process_weather_data)$onion_weather <- onion_weather # get weather file
+      environment(process_weather_data)$onion_weather <- onion_weather # get weather file
       
       # weather_precomputed <- process_weather_data(
       #   file_path = onion_weather_path,
       #   base_temp = 1
       # )
-
+      # loading animation
+      waiter_show(
+        html = tagList(
+          spin_fading_circles(),
+          "Modell ausführen und Abbildungen erstellen ..."
+        ),
+        color = "rgba(0, 0, 0, 0.8)"
+      )
+      
+      # If something throws, hide the waiter so users aren't stuck
+      ok <- FALSE
+      on.exit({
+        if (!ok) waiter_hide()
+      }, add = TRUE)
+      # end of loading animation
+      
       decisionSupport::mcSimulation(
         estimate = decisionSupport::as.estimate(input_file),
         model_function = onion_climate_impact,
         numberOfModelRuns = input$num_simulations_c,
         functionSyntax = "plainNames"
       )
-      
+      # #part of loading animation
+      # session$onFlushed(function() waiter_hide(), once = TRUE)
+      # ok <- TRUE
+      # 
     }
     else{
       shiny::showNotification(
@@ -810,19 +853,70 @@ server <- function(input, output, session) {
       
       mc_data_order<-youtputs_to_xinputs_scenarios(mc_data, outputs)
       source("functions/plot_yield_asparagus.R")
-      plot1<-plot_yield_asparagus(mc_data_order)
+      plot1<-plot_yield_asparagus(mc_data_order) |>
+        add_meta(
+        title    = "Figure 1. Distribution of the *incremental* NPV",
+        subtitle = "Difference between agroforestry and treeless farming under identical conditions",
+        caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
+                      as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
+                      The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
+        , legend = "none")
       
-      source("functions/VIP_plot.R")
-      plot2<-VIP_plot(mc_data_order)
+      source("functions/VIP_plot.R") 
+      plot2<-VIP_plot(mc_data_order)|>
+        add_meta(
+          title    = "Figure 1. Distribution of the *incremental* NPV",
+          subtitle = "Difference between agroforestry and treeless farming under identical conditions",
+          caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
+                      as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
+                      The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
+          , legend = "none")
+      
+      # No plot3 for Spargel → clear outputs
+      output$plot3_ui    <- renderPlot(NULL)
+      output$plot3_dl_ui <- renderUI(NULL)
     }
     
     else if (crop=="Zwiebel"){
       
       source("functions/yield_boxplot_onion.R")
-      plot1<-plot_yield_onion(mc_data)
+      plot1<-plot_yield_onion(mc_data) |>
+        add_meta(
+          title    = "Figure 1. Distribution of the *incremental* NPV",
+          subtitle = "Difference between agroforestry and treeless farming under identical conditions",
+          caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
+                      as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
+                      The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
+          , legend = "none")
       
       source("functions/VIP_Plot_onion.R")
-      plot2<-make_onion_vip_combined_plot(mc_data)
+      plot2<-make_onion_vip_combined_plot(mc_data) |>
+        add_meta(
+          title    = "Figure 1. Distribution of the *incremental* NPV",
+          subtitle = "Difference between agroforestry and treeless farming under identical conditions",
+          caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
+                      as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
+                      The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
+          , legend = "none")
+      # replace this line with codes in lines 911 - 919
+      plot3<-make_onion_vip_combined_plot(mc_data)|>
+        add_meta(
+          title    = "Figure 1. Distribution of the *incremental* NPV",
+          subtitle = "Difference between agroforestry and treeless farming under identical conditions",
+          caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
+                      as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
+                      The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
+          , legend = "none")
+      
+      # source("functions/yield_reduction_plot_onion.R")
+      # plot3<-make_yield_reduction_heatmap(mc_data) |>
+      # add_meta(
+      #   title    = "Figure 1. Distribution of the *incremental* NPV",
+      #   subtitle = "Difference between agroforestry and treeless farming under identical conditions",
+      #   caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
+      #                 as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
+      #                 The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
+      #   , legend = "none")
     }
     # source("functions/plot_yield_asparagus.R")
     # plot1<-plot_yield_asparagus(mc_data_order)
@@ -963,7 +1057,7 @@ server <- function(input, output, session) {
         file.copy(from = info$path, to = file, overwrite = TRUE)
       }
     )
-
+    
     output$plot1_ui <- renderPlot({ plot1 })
     make_download("download_plot1", plot1, "Figure1_marketable_yield.png")
     output$plot1_dl_ui <- renderUI({
@@ -976,11 +1070,14 @@ server <- function(input, output, session) {
       downloadButton("download_plot2", "Abbildung herunterladen")
     })
     
-    # output$plot3_ui <- renderPlot({ plot3 })
-    # make_download("download_plot3", plot3, "Figure3_Funding_NPVs.png")
-    # output$plot3_dl_ui <- renderUI({
-    #   downloadButton("download_plot3", "Abbildung herunterladen")
-    # })
+    crop <- selected_crop()
+    if (crop == "Zwiebel") {
+      output$plot3_ui <- renderPlot({ plot3 })
+      make_download("download_plot3", plot3, "Figure3_Yield_Reduction.png")
+      output$plot3_dl_ui <- renderUI({
+        downloadButton("download_plot3", "Abbildung herunterladen")
+      })
+    }
     # 
     # output$plot4_ui <- renderPlot({ plot4 })
     # make_download("download_plot4", plot4, "Figure4_Annual_Cashflow.png")
