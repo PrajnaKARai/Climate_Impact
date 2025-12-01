@@ -863,14 +863,15 @@ server <- function(input, output, session) {
           , legend = "none")
       
       source("functions/VIP_plot.R") 
-      plot2<-VIP_plot(mc_data_order)|>
-        add_meta(
-          title    = "Figure 1. Distribution of the *incremental* NPV",
-          subtitle = "Difference between agroforestry and treeless farming under identical conditions",
-          caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
-                      as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
-                      The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
-          , legend = "none")
+      plot2<-VIP_plot(mc_data_order)
+      # |>
+      #   add_meta(
+      #     title    = "Figure 1. Distribution of the *incremental* NPV",
+      #     subtitle = "Difference between agroforestry and treeless farming under identical conditions",
+      #     caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
+      #                 as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
+      #                 The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
+      #     , legend = "none")
       
       # No plot3 for Spargel → clear outputs
       output$plot3_ui    <- renderPlot(NULL)
@@ -890,23 +891,25 @@ server <- function(input, output, session) {
           , legend = "none")
       
       source("functions/VIP_Plot_onion.R")
-      plot2<-make_onion_vip_combined_plot(mc_data) |>
-        add_meta(
-          title    = "Figure 1. Distribution of the *incremental* NPV",
-          subtitle = "Difference between agroforestry and treeless farming under identical conditions",
-          caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
-                      as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
-                      The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
-          , legend = "none")
+      plot2<-make_onion_vip_combined_plot(mc_data) 
+      # |>
+        # add_meta(
+        #   title    = "Figure 1. Distribution of the *incremental* NPV",
+        #   subtitle = "Difference between agroforestry and treeless farming under identical conditions",
+        #   caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
+        #               as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
+        #               The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
+        #   , legend = "none")
       # replace this line with codes in lines 911 - 919
-      plot3<-make_onion_vip_combined_plot(mc_data)|>
-        add_meta(
-          title    = "Figure 1. Distribution of the *incremental* NPV",
-          subtitle = "Difference between agroforestry and treeless farming under identical conditions",
-          caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
-                      as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
-                      The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
-          , legend = "none")
+      plot3<-make_onion_vip_combined_plot(mc_data)
+      # |>
+      #   add_meta(
+      #     title    = "Figure 1. Distribution of the *incremental* NPV",
+      #     subtitle = "Difference between agroforestry and treeless farming under identical conditions",
+      #     caption  = "Figure 2 shows the NPV distributions of the decision to establish the apple alley cropping system
+      #                 as compared to the decision to continue with monoculture for the specified time (i.e., NPV agroforestry - NPV monoculture under identical conditions).
+      #                 The x-axis displays NPV values (i.e., the sum of discounted annual cash flows) and y-axis displays the probability of each NPV amount to occur (i.e., higer y-values indicate higher probability)"
+      #     , legend = "none")
       
       # source("functions/yield_reduction_plot_onion.R")
       # plot3<-make_yield_reduction_heatmap(mc_data) |>
