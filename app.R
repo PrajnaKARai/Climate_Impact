@@ -131,7 +131,7 @@ source("functions/asparagus_sim_scen_app.R")
 #onion scripts
 source("functions/01_weather_shiny.R")
 source("functions/02_helpers_shiny.R")
-source("functions/03_model_shiny.R")
+source("functions/onion_model_shiny.R")
 
 #strawberry scripts
 
@@ -284,7 +284,7 @@ ui <- fluidPage(
               ###Tool description ----
               # Provide brief explanation of the DA model
               tags$h6(
-                "Diese App simuliert mögliche Erträge von weißem Spargel im Jahr 2075 unter verschiedenen SSP-Klimaszenarien",
+                "Diese App simuliert die potenziellen Erträge der ausgewählten Kulturpflanze im Jahr 2075 unter verschiedenen SSP-Klimaszenarien.",
                 tags$br(),
                 tags$br(),
                 "Verwenden Sie die Register auf der linken Seite, um die Variablenbereiche entsprechend Ihren örtlichen Gegebenheiten anzupassen.",
@@ -456,7 +456,7 @@ server <- function(input, output, session) {
   
   
   # util: turns a category vector into a JS condition 
-  ### render but hide unchecked expertise categories - default show-all ----
+  ## render but hide unchecked expertise categories - default show-all
   panel_condition <- function(cat_vec) {
     cat_vec <- trimws(cat_vec)
     cat_vec <- cat_vec[cat_vec != "" & !is.na(cat_vec)]
@@ -677,8 +677,8 @@ server <- function(input, output, session) {
     if (is.null(crop) || !nzchar(crop)) {
       showModal(
         modalDialog(
-          title = "Keine Nutzpflanze ausgewählt",
-          "Bitte wählen Sie eine Nutzpflanze aus, bevor Sie die Simulation starten.",
+          title = "Keine Kulturpflanze ausgewählt",
+          "Bitte wählen Sie eine Kulturpflanze aus, bevor Sie die Simulation starten.",
           easyClose = TRUE,
           footer = modalButton("OK")
         )
@@ -690,11 +690,6 @@ server <- function(input, output, session) {
       environment(asparagus_sim_scen)$scenarios <- scenarios
       environment(asparagus_sim_scen)$risk_df <- risk_df
       
-      
-      # shiny::showNotification(
-      #   "If you have entered all values, consider saving the project",
-      #   type = "message"
-      # )
       decisionSupport::mcSimulation(
         estimate          = decisionSupport::as.estimate(input_file),
         model_function    = asparagus_sim_scen,
@@ -703,16 +698,14 @@ server <- function(input, output, session) {
       )
     }
     else if (crop=="Zwiebel"){
-      environment(process_weather_data)$onion_weather <- onion_weather
+      #environment(onion_model_shiny)$onion_weather <- onion_weather
+       environment(process_weather_data)$onion_weather <- onion_weather # get weather file
       
-      weather_precomputed <- process_weather_data(
-        file_path = onion_weather,
-        base_temp = 1
-      )
-      # shiny::showNotification(
-      #   "If you have entered all values, consider saving the project",
-      #   type = "message"
+      # weather_precomputed <- process_weather_data(
+      #   file_path = onion_weather_path,
+      #   base_temp = 1
       # )
+
       decisionSupport::mcSimulation(
         estimate = decisionSupport::as.estimate(input_file),
         model_function = onion_climate_impact,
@@ -815,12 +808,45 @@ server <- function(input, output, session) {
                  "Tsoil_mean")
       
       mc_data_order<-youtputs_to_xinputs_scenarios(mc_data, outputs)
+      source("functions/plot_yield_asparagus.R")
+      plot1<-plot_yield_asparagus(mc_data_order)
+      
+      source("functions/VIP_plot.R")
+      plot2<-VIP_plot(mc_data_order)
     }
-    source("functions/plot_yield_asparagus.R")
-    plot1<-plot_yield_asparagus(mc_data_order)
     
-    source("functions/VIP_plot.R")
-    plot2<-VIP_plot(mc_data_order)
+    else if (crop=="Zwiebel"){
+      
+      #restructure output, write additional parameters that are used in the model
+      #form output to input side for analysis
+      # outputs<-c("water_stress_risk",
+      #            "insect_risk",
+      #            "disease_risk",
+      #            "photosynthetic_active_days",
+      #            "weather_damage_risk",
+      #            "growth_start_doy",
+      #            "speargrowth",
+      #            "chill_portions",
+      #            "late_frost_risk",
+      #            "temp_fluctuation_risk",
+      #            "extreme_rainfall_risk",
+      #            "extreme_heat_risk",
+      #            "Tsoil_mean")
+      # 
+      # mc_data_order<-youtputs_to_xinputs_scenarios(mc_data, outputs)
+      source("functions/yield_boxplot_onion.R")
+      plot1<-plot_yield_asparagus(mc_data_order)
+      
+      source("functions/VIP_Plot_onion.R")
+      plot2<-VIP_plot(mc_data_order)
+    }
+    # source("functions/plot_yield_asparagus.R")
+    # plot1<-plot_yield_asparagus(mc_data_order)
+    # 
+    # source("functions/VIP_plot.R")
+    # plot2<-VIP_plot(mc_data_order)
+    
+    
     #     plot2 <- decisionSupport::plot_distributions(
     #       mc_data, "NPV_decis_AF_ES3",
     #       method     = "smooth_simple_overlay",

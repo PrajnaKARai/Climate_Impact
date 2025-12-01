@@ -128,7 +128,7 @@ run_plsr_for_scenario <- function(sim_list, scenario = "today") {
   vip_tab$Variable <- factor(vip_tab$Variable, levels = order_labels, ordered = TRUE)
   vip_tab$scenario <- factor(scenario)#, levels = c(today="Year 2020","Year 2075\nSSP1 2.6", "Year 2075\nSSP2 4.5", "Year 2075\nSSP3 7.0","Year 2075\nSSP5 8.5")) 
   # Plot
-    plot <- ggplot(vip_tab, aes(x = scenario, y = Variable)) +
+  plot <- ggplot(vip_tab, aes(x = scenario, y = Variable)) +
     geom_point(aes(size = VIP, color = coef_sign), shape=16) +
     scale_size_area(max_size = 10, breaks = c(1,2,3,4), name = "VIP") +
     scale_color_manual(values = c("negative"="firebrick", "zero" = "grey70","positive"="cadetblue"), name="Coefficient")  +
@@ -146,47 +146,47 @@ run_plsr_for_scenario <- function(sim_list, scenario = "today") {
 
 VIP_plot<-function(sim_results)
 {
-# -----------------------------
-# Labels (deutsche Namen)
-# -----------------------------
-
-# -----------------------------
-# Szenarien-Liste
-# -----------------------------
-scenarios <- c("today", "ssp1", "ssp2", "ssp3", "ssp5")
-#sim_results <- readRDS("asparagus/MC_results/MC_results_scenarios.RDS")
-# Alle Szenarien laufen lassen
-results <- lapply(scenarios, function(scen) {
-  out <- run_plsr_for_scenario(sim_results, scen)
-  out$scenario <- scen
-  return(out)
-})
-names(results) <- scenarios
-
-# # -----------------------------
-# # Einzelplot (Beispiel ssp370)
-# # -----------------------------
-# results[["ssp3"]]$plot
-# -----------------------------
-# Theme für plots
-# -----------------------------
-no_x <- theme(axis.title.x = element_blank(),
-              axis.text.x  = element_blank(),
-              axis.ticks.x = element_blank())
-no_y <- theme(axis.title.y = element_blank(),
-              axis.text.y = element_blank(),
-              axis.ticks.y = element_blank())
-# -----------------------------
-# Vergleichsplot (alle Szenarien nebeneinander)
-# -----------------------------
-
-
-comparison_plot <- (results[["today"]]$plot + no_x+ theme(legend.position = "none"))+
-  (results[["ssp1"]]$plot + no_x + no_y+ theme(legend.position = "none"))+
-  (results[["ssp2"]]$plot + no_x + no_y+ theme(legend.position = "none"))+
-  (results[["ssp3"]]$plot + no_x + no_y+ theme(legend.position = "none"))+
-  (results[["ssp5"]]$plot + no_x + no_y)+
-  plot_layout(ncol = 5)
-
-return(comparison_plot)
+  # -----------------------------
+  # Labels (deutsche Namen)
+  # -----------------------------
+  
+  # -----------------------------
+  # Szenarien-Liste
+  # -----------------------------
+  scenarios <- c("today", "ssp1", "ssp2", "ssp3", "ssp5")
+  #sim_results <- readRDS("asparagus/MC_results/MC_results_scenarios.RDS")
+  # Alle Szenarien laufen lassen
+  results <- lapply(scenarios, function(scen) {
+    out <- run_plsr_for_scenario(sim_results, scen)
+    out$scenario <- scen
+    return(out)
+  })
+  names(results) <- scenarios
+  
+  # # -----------------------------
+  # # Einzelplot (Beispiel ssp370)
+  # # -----------------------------
+  # results[["ssp3"]]$plot
+  # -----------------------------
+  # Theme für plots
+  # -----------------------------
+  no_x <- theme(axis.title.x = element_blank(),
+                axis.text.x  = element_blank(),
+                axis.ticks.x = element_blank())
+  no_y <- theme(axis.title.y = element_blank(),
+                axis.text.y = element_blank(),
+                axis.ticks.y = element_blank())
+  # -----------------------------
+  # Vergleichsplot (alle Szenarien nebeneinander)
+  # -----------------------------
+  
+  
+  comparison_plot <- (results[["today"]]$plot + no_x+ theme(legend.position = "none"))+
+    (results[["ssp1"]]$plot + no_x + no_y+ theme(legend.position = "none"))+
+    (results[["ssp2"]]$plot + no_x + no_y+ theme(legend.position = "none"))+
+    (results[["ssp3"]]$plot + no_x + no_y+ theme(legend.position = "none"))+
+    (results[["ssp5"]]$plot + no_x + no_y)+
+    plot_layout(ncol = 5)
+  
+  return(comparison_plot)
 }
